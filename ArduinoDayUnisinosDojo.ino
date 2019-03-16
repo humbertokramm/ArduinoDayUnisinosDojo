@@ -1,39 +1,59 @@
-#include <ESP8266WiFi.h>
+#include <WiFi.h>
+#include <WiFiMulti.h>
 #include <WiFiClientSecure.h>
 #include <UniversalTelegramBot.h>
-#define BOTtoken "135924:AAErDKEJaQpEnqs_xj35asdGQ5kK6dQet4"//Define o Token do *seu* BOT
- 
+#define BOTtoken "875639737:AAEjrEp6BE0-PEB7dYGtQ2gLBj8s3XRR-tk"//Define o Token do *seu* BOT
+ WiFiClientSecure client;
+UniversalTelegramBot bot(BOTtoken, client);
+WiFiMulti WiFiMulti;
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOTtoken, client);
  
 String id, text;//Váriaveis para armazenamento do ID e TEXTO gerado pelo Usuario
 unsigned long tempo;
  
+#define LED   14
+#define LED2   26
+ 
 void setup()
 {
-   pinMode(D4, OUTPUT);//LED conectado à saida
-   WiFi.mode(WIFI_STA);//Define o WiFi como Estaçao
-   connect();//Funçao para Conectar ao WiFi
+    Serial.begin(115200);
+    delay(10);
+    
+    pinMode(LED, OUTPUT);//LED conectado à saida
+    digitalWrite(LED, LOW);
+   
+   
+
+    // We start by connecting to a WiFi network
+    WiFiMulti.addAP("ArduinoDay", "Arduino2019");
+
+    Serial.println();
+    Serial.println();
+    Serial.print("Wait for WiFi... ");
+
+    while(WiFiMulti.run() != WL_CONNECTED) {
+        Serial.print(".");
+        delay(500);
+    }
+
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+
+    delay(500);
 }
  
 void loop()
 {
    if (millis() - tempo > 2000)//Faz a verificaçao das funçoes a cada 2 Segundos
    {
-      connect();//Funçao para verificar se ainda há conexao
       readTel();//Funçao para ler o telegram
       tempo = millis();//Reseta o tempo
    }
 }
  
-void connect()//Funçao para Conectar ao wifi e verificar à conexao.
-{
-   if (WiFi.status() != WL_CONNECTED)//Caso nao esteja conectado ao WiFi, Ira conectarse
-   {
-      WiFi.begin("SUA REDE", "SUA SENHA");//Insira suas informaçoes da rede
-      delay(2000);
-   }
-}
  
 void readTel()//Funçao que faz a leitura do Telegram.
 {
@@ -47,13 +67,13 @@ void readTel()//Funçao que faz a leitura do Telegram.
  
       if (text.indexOf("ON") > -1)//Caso o texto recebido contenha "ON"
       {
-         digitalWrite(D4, 0);//Liga o LED
+         digitalWrite(LED, 0);//Liga o LED
          bot.sendMessage(id, "LED ON", "");//Envia uma Mensagem para a pessoa que enviou o Comando.
       }
  
       else if (text.indexOf("OFF") > -1)//Caso o texto recebido contenha "OFF"
       {
-         digitalWrite(D4, 1);//Desliga o LED
+         digitalWrite(LED, 1);//Desliga o LED
          bot.sendMessage(id, "LED OFF", "");//Envia uma Mensagem para a pessoa que enviou o Comando.
       }
  
